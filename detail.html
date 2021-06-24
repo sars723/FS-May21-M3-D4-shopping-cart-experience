@@ -42,6 +42,10 @@
         top: 0;
         left: 0;
       }
+      .book-detail {
+        font-size: 28px;
+        margin-right: 20px;
+      }
     </style>
   </head>
   <body>
@@ -118,23 +122,7 @@
         </form>
       </div>
     </nav>
-    <div class="container">
-      <div id="cart-container" class="row">
-        <div class="col-12 col-md-6">
-          <h1 id="cart-list-title" class="d-none">Cart Lists</h1>
-          <button
-            id="clean-cart-btn"
-            type="button"
-            class="btn btn-danger d-none mb-3"
-            onclick="cleanCart()"
-          >
-            clean cart
-          </button>
-          <ul id="cart-list" class="list-group"></ul>
-        </div>
-      </div>
-      <div id="parent-wrapper" class="row mt-5"></div>
-    </div>
+    <div class="container"></div>
 
     <!-- Option 1: jQuery and Bootstrap Bundle (includes Popper) -->
     <script
@@ -149,106 +137,39 @@
     ></script>
 
     <script>
-      const parentWrapper = document.getElementById("parent-wrapper");
-      const cartListWrapper = document.getElementById("cart-list");
-      const searchInputValue = document.getElementById("search-input");
-      const cartListTitle = document.getElementById("cart-list-title");
-      const cleanCartBtn = document.getElementById("clean-cart-btn");
-      const cartContainer = document.getElementById("cart-container");
-      const cartLists = document.getElementsByTagName(" li");
+      const container = document.querySelector(".container");
+      const urlParams = new URLSearchParams(window.location.search);
 
-      let books = [];
-      const bookTitle = document.getElementsByClassName(".title");
-      //cleans all cart lists at once
-      const cleanCart = () => {
-        /*  cartLists.forEach((list) => list.remove()); */
-        cartListWrapper.innerHTML = "";
-      };
-      //searchs books
-      const searchBook = (e) => {
-        e.preventDefault();
-        let filterdBook = books.filter(
-          (book) =>
-            book.title
-              .toLowerCase()
-              .indexOf(searchInputValue.value.toLowerCase()) !== -1
-        );
-        console.log(filterdBook);
-        if (filterdBook !== "") {
-          parentWrapper.innerHTML = "";
-          displayBooks(filterdBook);
-        } else {
-          displayBooks(books);
-        }
-
-        console.log(filterdBook);
-      };
+      let bookId = urlParams.get("id");
+      console.log(bookId);
       //displays books on the page
-      const displayBooks = (books) => {
-        let bookTitle = "";
-        books.forEach((book) => {
-          bookTitle = book.title;
-          parentWrapper.innerHTML += `
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3 position-relative">
+      const displayBooks = (book) => {
+        container.innerHTML += `
+            <div class="col-12 col-sm-6  position-relative mx-auto mt-5">
                 <div class="card" ">
-                  <img src="${book.img}" class="card-img-top" alt="${book.title}">
+                   <img src="${book.img}" class="card-img-top" alt="${book.title}">
                     <div class="card-body text-center ">
-                         <a  href="./detail.html?id=${book.asin}"> <h5 id="title" class="card-title title">${book.title}</h5></a>
-                        <p class="card-text">${book.category}</p>
-                        <span class="badge badge-warning position-absolute ">${book.price}</span>
-                        <button
-                        type="button"
-                        class="btn btn-sm btn-outline-secondary"
-                        onclick="addToList(event)"
-                      >
-                        Add to Cart
-                      </button>
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-outline-secondary"
-                        onclick="removeBook(event)"
-                      >
-                        Ignore
-                      </button>
+                        <h5 id="title" class="card-title title"><span class="book-detail">Book Title:</span>${book.title}</h5>
+                        <h5 class="card-text"><span class="book-detail">Book Category:</span>${book.category}</h5>
+                        <h5 class="card-text"><span class="book-detail">Book Price:</span>${book.price}€</h5>
+                       
+                      
                     </div>
                 </div>
             </div>
         `;
-        });
-      };
-      //removes books from the page
-      const removeBook = (e) => {
-        e.target.closest(".col-12").remove();
-      };
-      //adds list of  books to cart
-      const addToList = (e) => {
-        console.log(e.target.parentElement.firstChild.nextSibling.innerHTML);
-        cartListTitle.style.cssText = "display:block !important";
-        cleanCartBtn.style.cssText = "display:block !important";
-        /*   if (cartListWrapper.innerHTML === "") {
-          cartListTitle.style.cssText = "display:none !important";
-        } */
-
-        cartListWrapper.innerHTML += `
-                    <li class="list-group-item"><div class="d-flex justify-content-between">${e.target.parentElement.firstChild.nextSibling.innerHTML}<button type="button" class="btn btn-danger"onclick="deleteList(event)">x</button></div></li>
-            `;
-      };
-      //deletes list of  books to cart
-      const deleteList = (e) => {
-        e.target.closest(".list-group-item").remove();
       };
       //fetches books from api
       const fetchData = () => {
-        fetch("https://striveschool-api.herokuapp.com/books")
+        fetch("https://striveschool-api.herokuapp.com/books/" + bookId)
           .then((res) => {
             console.log(res);
             return res.json();
           })
-          .then((fetchedBooks) => {
-            console.log(fetchedBooks);
+          .then((fetchedBook) => {
+            console.log(fetchedBook);
 
-            books = fetchedBooks;
-            displayBooks(books);
+            displayBooks(fetchedBook);
           })
           .catch((err) => console.log(err));
       };
